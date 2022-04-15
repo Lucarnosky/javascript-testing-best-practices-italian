@@ -282,7 +282,7 @@ it("Quando si richiede un amministratore, assicurarsi che nel risultato siano so
 
 <br/>
 
-### :thumbsdown: Esempoo Anti-Pattern: Un caso di test che prova il codice interno senza una buona ragione
+### :thumbsdown: Esempio Anti-Pattern: Un caso di test che prova il codice interno senza una buona ragione
 
 ![](https://img.shields.io/badge/🔧%20Example%20using%20Mocha-blue.svg "Esempi con Mocha & Chai")
 
@@ -312,16 +312,16 @@ it("Test White-box: Quando un metodo interno riceve l'iva a 0, restituisce 0 com
 
 <br/><br/>
 
-## ⚪ ️ ️1.5 Scegli la giusta controprova: Evita le imitazioni in favore delle bozze e delle spie
+## ⚪ ️ ️1.5 Scegli la giusta controprova: Evita i mocks in favore delle stubs e delle spies
 
-:white_check_mark: **Giusto:** Test doubles are a necessary evil because they are coupled to the application internals, yet some provide immense value (<a href="https://martinfowler.com/articles/mocksArentStubs.html" data-href="https://martinfowler.com/articles/mocksArentStubs.html" class="markup--anchor markup--p-anchor" rel="noopener nofollow" target="_blank">[Read here a reminder about test doubles: mocks vs stubs vs spies](https://martinfowler.com/articles/mocksArentStubs.html)</a>).
+:white_check_mark: **Giusto:** I test doppi sono un male necessario perché sono accoppiati agli interni dell'applicazione, ma alcuni forniscono un valore immenso (<a href="https://martinfowler.com/articles/mocksArentStubs.html" data-href="https://martinfowler.com/articles/mocksArentStubs.html" class="markup--anchor markup--p-anchor" rel="noopener nofollow" target="_blank">[Qui puoi leggere un memento a proposito dei test doppi: mocks vs stubs vs spies](https://martinfowler.com/articles/mocksArentStubs.html)</a>).
 
-Before using test doubles, ask a very simple question: Do I use it to test functionality that appears, or could appear, in the requirements document? If no, it’s a white-box testing smell.
+Prima di usare i test doppi, fatti una semplice domanda: Lo sto usando per testare una funzionalità che apparirà, o potrebbe apparire, nel documento dei requisiti? Se la risposta è no, probabilmente è un test white-box.
 
-For example, if you want to test that your app behaves reasonably when the payment service is down, you might stub the payment service and trigger some ‘No Response’ return to ensure that the unit under test returns the right value. This checks our application behavior/response/outcome under certain scenarios. You might also use a spy to assert that an email was sent when that service is down — this is again a behavioral check which is likely to appear in a requirements doc (“Send an email if payment couldn’t be saved”). On the flip side, if you mock the Payment service and ensure that it was called with the right JavaScript types — then your test is focused on internal things that have nothing to do with the application functionality and are likely to change frequently
+Per esempio, se vuoi testare se la tua applicazione risponde in maniera ragionevole quando il servizio dei pagamenti non è raggiungibile, dovresti abbozzare il servizio dei pagamenti e scatenare una qualche 'Non risposta' come risultato per assicurarsi che l'unità sotto test ritorni il valore corretto. Questo controlla il comportamento/risposta/risultato della nostra applicazione sotto certe circostanze. Potresti anche usare una spy per asserire che un'email è stata inviata quando il servizio non è raggiungibile, anche questo è un controllo comportamentale che probabilmente apparirà sul documento dei requisiti ("Inviare un'email quando il pagamento non può essere salvato"). D'altra parte, se fai un mock del servizio di pagamento e ti assicuri che sia chiamato con i tipi Javascript corretti - allora il tuo test si concentra su cose interne che non hanno nulla a che fare con la funzionalità dell'applicazione e che è probabile che cambino frequentemente
 <br/>
 
-❌ **Altrimenti:** Any refactoring of code mandates searching for all the mocks in the code and updating accordingly. Tests become a burden rather than a helpful friend
+❌ **Altrimenti:** Qualsiasi refactoring del codice impone la ricerca di tutti i mock nel codice e l'aggiornamento di conseguenza. I test diventano un peso piuttosto che un amico utile.
 
 <br/>
 
@@ -329,34 +329,34 @@ For example, if you want to test that your app behaves reasonably when the payme
 
 <br/>
 
-### :thumbsdown: Esempoo Anti-Pattern: Mocks focus on the internals
+### :thumbsdown: Esempio Anti-Pattern: Mocks concentrati sull'interno
 
-![](https://img.shields.io/badge/🔧%20Example%20using%20Sinon-blue.svg "Examples with Sinon")
+![](https://img.shields.io/badge/🔧%20Example%20using%20Sinon-blue.svg "Esempi con Sinon")
 
 ```javascript
-it("When a valid product is about to be deleted, ensure data access DAL was called once, with the right product and right config", async () => {
-  //Assume we already added a product
+it("Quando un prodotto valido sta per essere cancellato, assicurarsi che l'accesso ai dati DAL sia stato chiamato una volta, con il prodotto giusto e la configurazione corretta", async () => {
+  //Supponiamo di aver già inserito il prodotto
   const dataAccessMock = sinon.mock(DAL);
-  //hmmm BAD: testing the internals is actually our main goal here, not just a side-effect
+  //hmmm MALE: testare le parti interne è il nostro obbiettivo, non solamente un effetto collaterale
   dataAccessMock
-    .expects("deleteProduct")
+    .expects("cancellaProdotto")
     .once()
-    .withArgs(DBConfig, theProductWeJustAdded, true, false);
-  new ProductService().deletePrice(theProductWeJustAdded);
+    .withArgs(DBConfig, prodottoAppenaAggiunto, true, false);
+  new ProductService().deletePrice(prodottoAppenaAggiunto);
   dataAccessMock.verify();
 });
 ```
 
 <br/>
 
-### :clap:Esempio di pratica corretta: spies are focused on testing the requirements but as a side-effect are unavoidably touching to the internals
+### :clap:Esempio di pratica corretta: le spie sono concentrate sulla verifica dei requisiti, ma come effetto collaterale toccano inevitabilmente gli interni
 
 ```javascript
-it("When a valid product is about to be deleted, ensure an email is sent", async () => {
-  //Assume we already added here a product
-  const spy = sinon.spy(Emailer.prototype, "sendEmail");
-  new ProductService().deletePrice(theProductWeJustAdded);
-  //hmmm OK: we deal with internals? Yes, but as a side effect of testing the requirements (sending an email)
+it("Quando un prodotto valido sta per essere cancellato, assicurarsi che sia inviata un'email", async () => {
+  //Supponiamo di aver già aggiunto il prodotto 
+  const spy = sinon.spy(Emailer.prototype, "inviaEmail");
+  new ProductService().cancellaPrezzo(prodottoAppenaAggiunto);
+  //hmmm OK: ci occupiamo di interni? Sì, ma come effetto collaterale di testare dei requisiti (invio di un'e-mail)
   expect(spy.calledOnce).to.be.true;
 });
 ```
@@ -365,18 +365,18 @@ it("When a valid product is about to be deleted, ensure an email is sent", async
 
 <br/><br/>
 
-## 📗 Want to learn all these practices with live video?
+## 📗 Vuoi imperare tutte queste pratiche con un video dal vivo?
 
-### Visit my online course [Testing Node.js & JavaScript From A To Z](https://www.testjavascript.com)
+### Visita il mio corso online [Testing Node.js & JavaScript From A To Z](https://www.testjavascript.com)
 
 <br/><br/>
 
-## ⚪ ️1.6 Don’t “foo”, use realistic input data
+## ⚪ ️1.6 Non usare "foo", usa dati reali
 
-:white_check_mark: **Giusto:** Often production bugs are revealed under some very specific and surprising input — the more realistic the test input is, the greater the chances are to catch bugs early. Use dedicated libraries like [Chance](https://github.com/chancejs/chancejs) or [Faker](https://www.npmjs.com/package/faker) to generate pseudo-real data that resembles the variety and form of production data. For example, such libraries can generate realistic phone numbers, usernames, credit card, company names, and even ‘lorem ipsum’ text. You may also create some tests (on top of unit tests, not as a replacement) that randomize fakers data to stretch your unit under test or even import real data from your production environment. Want to take it to the next level? See the next bullet (property-based testing).
+:white_check_mark: **Giusto:** Spesso i bug di produzione vengono fuori con input specifici e sorprendenti - più l'input sarà realistico, maggiori sono le possibilità di trovare i bug in anticipo. Usa librerie dedicate come [Chance](https://github.com/chancejs/chancejs) o [Faker](https://www.npmjs.com/package/faker) per generare dati pseudo-reali per generare dati pseudo-reali che assomigliano alla varietà e alla forma dei dati di produzione. Per esempio, queste libreria possono genrare numeri di telefono realistici, cognomi, carte di credito, nomi di compagnie e addirittura testo 'lorem ipsum'. Puoi anche creare alcuni test (oltre agli unit test, non in sostituzione) che randomizzano i dati dei falsi per estendere l'unità sottoposta a test o persino importare dati reali dal tuo ambiente di produzione. Vuoi portarlo al livello successivo? Guarda il prossimo punto elenco (test basato sulla proprietà).
 <br/>
 
-❌ **Altrimenti:** All your development testing will falsely show green when you use synthetic inputs like “Foo”, but then production might turn red when a hacker passes-in a nasty string like “@3e2ddsf . ##’ 1 fdsfds . fds432 AAAA”
+❌ **Altrimenti:** Tutti i tuoi test di sviluppo mostreranno erroneamente semaforo verde quando usi input sintetici come “Foo”, ma in produzione può trasformarsi in luce rossa se un hacke passa una brutta stringa come “@3e2ddsf . ##’ 1 fdsfds . fds432 AAAA”
 
 <br/>
 
@@ -384,40 +384,40 @@ it("When a valid product is about to be deleted, ensure an email is sent", async
 
 <br/>
 
-### :thumbsdown: Esempoo Anti-Pattern: A test suite that passes due to non-realistic data
+### :thumbsdown: Esempio Anti-Pattern: Una suite di test superata a causa di dati non realistici
 
-![](https://img.shields.io/badge/🔧%20Example%20using%20Jest-blue.svg "Examples with Jest")
+![](https://img.shields.io/badge/🔧%20Example%20using%20Jest-blue.svg "Esempi con Jest")
 
 ```javascript
-const addProduct = (name, price) => {
-  const productNameRegexNoSpace = /^\S*$/; //no white-space allowed
+const aggiungiProdotto = (nome, prezzo) => {
+  const nomeProdottoRegexNienteSpazi = /^\S*$/; //non sono permessi spazi
 
-  if (!productNameRegexNoSpace.test(name)) return false; //this path never reached due to dull input
+  if (!nomeProdottoRegexNienteSpazi.test(nome)) return false; //Questa possibilità non verrà mai raggiunta a causa di codice non realistico
 
-  //some logic here
+  //la logica va qui
   return true;
 };
 
-test("Wrong: When adding new product with valid properties, get successful confirmation", async () => {
-  //The string "Foo" which is used in all tests never triggers a false result
-  const addProductResult = addProduct("Foo", 5);
-  expect(addProductResult).toBe(true);
-  //Positive-false: the operation succeeded because we never tried with long
-  //product name including spaces
+test("Sbagliato: Quando si aggiungere un nuovo prodotto con proprietà valide, si riceve una conferma di successo", async () => {
+  //La stringa "Foo" che viene usata in tutti i test non scatenerà mai un risultato come falso 
+  const risultatoAggiungiProdotto = aggiungiProdotto("Foo", 5);
+  expect(risultatoAggiungiProdotto).toBe(true);
+  //Falso Positivo: l'operazione è un successo perchè non abbiamo mai provato molto
+  //Nome prodotto con spazi
 });
 ```
 
 <br/>
 
-### :clap:Esempio di pratica corretta: Randomizing realistic input
+### :clap:Esempio di pratica corretta: Randomizzare input realistico
 
 ```javascript
-it("Better: When adding new valid product, get successful confirmation", async () => {
-  const addProductResult = addProduct(faker.commerce.productName(), faker.random.number());
-  //Generated random input: {'Sleek Cotton Computer',  85481}
-  expect(addProductResult).to.be.true;
-  //Test failed, the random input triggered some path we never planned for.
-  //We discovered a bug early!
+it("Meglio: Quando si aggiungere un nuovo prodotto con proprietà valide, si riceve una conferma di successo", async () => {
+  const risultatoAggiungiProdotto = aggiungiProdotto(faker.commerce.productName(), faker.random.number());
+  //Genera input casuale: {'Sleek Cotton Computer',  85481}
+  expect(risultatoAggiungiProdotto).to.be.true;
+  //Test fallito, l'input casuale ha scatenato una possibilità che non abbiamo mai preso in considerazione.
+  //Abbiamo scoperto un bug precocemente!
 });
 ```
 
@@ -440,7 +440,7 @@ it("Better: When adding new valid product, get successful confirmation", async (
 
 ### :clap: Esempio di pratica corretta: Testing many input permutations with “fast-check”
 
-![](https://img.shields.io/badge/🔧%20Example%20using%20Jest-blue.svg "Examples with Jest")
+![](https://img.shields.io/badge/🔧%20Example%20using%20Jest-blue.svg "Esempi con Jest")
 
 ```javascript
 import fc from "fast-check";
@@ -479,9 +479,9 @@ It’s worth noting that there are few cases where long & external snapshots are
 
 <br/>
 
-### :thumbsdown: Esempoo Anti-Pattern: Coupling our test to unseen 2000 lines of code
+### :thumbsdown: Esempio Anti-Pattern: Coupling our test to unseen 2000 lines of code
 
-![](https://img.shields.io/badge/🔧%20Example%20using%20Jest-blue.svg "Examples with Jest")
+![](https://img.shields.io/badge/🔧%20Example%20using%20Jest-blue.svg "Esempi con Jest")
 
 ```javascript
 it("TestJavaScript.com is renderd correctly", () => {
@@ -542,7 +542,7 @@ it("When visiting TestJavaScript.com home page, a menu is displayed", () => {
 
 <br/>
 
-### :thumbsdown: Esempoo Anti-Pattern: The test failure is unclear because all the cause is external and hides within huge JSON
+### :thumbsdown: Esempio Anti-Pattern: The test failure is unclear because all the cause is external and hides within huge JSON
 
 ![](https://img.shields.io/badge/🔧%20Example%20using%20Mocha-blue.svg "Examples with Mocha")
 
@@ -598,7 +598,7 @@ A more elegant alternative is the using the one-line dedicated Chai assertion: e
 
 <br/>
 
-### :thumbsdown: Esempoo Anti-Pattern: A long test case that tries to assert the existence of error with try-catch
+### :thumbsdown: Esempio Anti-Pattern: A long test case that tries to assert the existence of error with try-catch
 
 ![](https://img.shields.io/badge/🔧%20Example%20using%20Mocha-blue.svg "Examples with Mocha")
 
@@ -648,7 +648,7 @@ it("When no product name, it throws error 400", async () => {
 
 ### :clap: Esempio di pratica corretta: Tagging tests as ‘#cold-test’ allows the test runner to execute only fast tests (Cold===quick tests that are doing no IO and can be executed frequently even as the developer is typing)
 
-![](https://img.shields.io/badge/🔧%20Example%20using%20Jest-blue.svg "Examples with Jest")
+![](https://img.shields.io/badge/🔧%20Example%20using%20Jest-blue.svg "Esempi con Jest")
 
 ```javascript
 //this test is fast (no DB) and we're tagging it correspondigly
@@ -682,7 +682,7 @@ describe("Order service", function() {
 
 ### :clap: Esempio di pratica corretta: Structuring suite with the name of unit under test and scenarios will lead to the convenient report that is shown below
 
-![](https://img.shields.io/badge/🔧%20Example%20using%20Jest-blue.svg "Examples with Jest")
+![](https://img.shields.io/badge/🔧%20Example%20using%20Jest-blue.svg "Esempi con Jest")
 
 ```javascript
 // Unit under test
@@ -702,7 +702,7 @@ describe("Transfer service", () => {
 
 <br/>
 
-### :thumbsdown: Esempoo Anti-Pattern: A flat list of tests will make it harder for the reader to identify the user stories and correlate failing tests
+### :thumbsdown: Esempio Anti-Pattern: A flat list of tests will make it harder for the reader to identify the user stories and correlate failing tests
 
 ![](https://img.shields.io/badge/🔧%20Example%20using%20Jest-blue.svg "Examples with Mocha")
 
@@ -835,7 +835,7 @@ Component tests focus on the Microservice ‘unit’, they work against the API,
 
 ### :clap:Esempio di pratica corretta: Testing middleware in isolation without issuing network calls and waking-up the entire Express machine
 
-![](https://img.shields.io/badge/🔧%20Example%20using%20Jest-blue.svg "Examples with Jest")
+![](https://img.shields.io/badge/🔧%20Example%20using%20Jest-blue.svg "Esempi con Jest")
 
 ```javascript
 //the middleware we want to test
@@ -920,7 +920,7 @@ Credit: <a href="https://github.com/TheHollidayInn" data-href="https://github.co
 
 <br/>
 
-### :thumbsdown: Esempoo Anti-Pattern: tests are not independent and rely on some global hook to feed global DB data
+### :thumbsdown: Esempio Anti-Pattern: tests are not independent and rely on some global hook to feed global DB data
 
 ![](https://img.shields.io/badge/🔧%20Example%20using%20Mocha-blue.svg "Examples with Mocha")
 
@@ -1156,7 +1156,7 @@ test("When users-list is flagged to show only VIP, should display only VIP membe
 
 <br/>
 
-### :thumbsdown: Esempoo Anti-Pattern: Assertion mix UI details and data
+### :thumbsdown: Esempio Anti-Pattern: Assertion mix UI details and data
 
 ```javascript
 test("When flagging to show only VIP, should display only VIP members", () => {
@@ -1218,7 +1218,7 @@ test("Whenever no data is passed to metric, show 0 as default", () => {
 
 <br/>
 
-### :thumbsdown: Esempoo Anti-Pattern: Relying on CSS attributes
+### :thumbsdown: Esempio Anti-Pattern: Relying on CSS attributes
 
 ```html
 <!-- the markup code (part of React component) -->
@@ -1287,7 +1287,7 @@ test("Realistic approach: When clicked to show filters, filters are displayed", 
 });
 ```
 
-### :thumbsdown: Esempoo Anti-Pattern: Mocking the reality with shallow rendering
+### :thumbsdown: Esempio Anti-Pattern: Mocking the reality with shallow rendering
 
 ```javascript
 test("Shallow/mocked approach: When clicked to show filters, filters are displayed", () => {
@@ -1353,7 +1353,7 @@ test("movie title appears", async () => {
 });
 ```
 
-### :thumbsdown: Esempoo Anti-Pattern: custom sleep code
+### :thumbsdown: Esempio Anti-Pattern: custom sleep code
 
 ```javascript
 test("movie title appears", async () => {
@@ -1603,7 +1603,7 @@ Feature: Twitter new tweet
 
 <br/>
 
-### :thumbsdown: Esempoo Anti-Pattern: A typical visual regression - right content that is served badly
+### :thumbsdown: Esempio Anti-Pattern: A typical visual regression - right content that is served badly
 
 ![alt text](assets/amazon-visual-regression.jpeg "Amazon page breaks")
 
@@ -1714,7 +1714,7 @@ Implementation tips: You may want to configure your continuous integration (CI) 
 
 <br/>
 
-### :thumbsdown: Esempoo Anti-Pattern: What’s wrong with this coverage report?
+### :thumbsdown: Esempio Anti-Pattern: What’s wrong with this coverage report?
 
 Based on a real-world scenario where we tracked our application usage in QA and find out interesting login patterns (Hint: the amount of login failures is non-proportional, something is clearly wrong. Finally it turned out that some frontend bug keeps hitting the backend login API)
 
@@ -1745,7 +1745,7 @@ Knowing that all or most of the mutations were killed gives much higher confiden
 
 <br/>
 
-### :thumbsdown: Esempoo Anti-Pattern: 100% coverage, 0% testing
+### :thumbsdown: Esempio Anti-Pattern: 100% coverage, 0% testing
 
 ![](https://img.shields.io/badge/🔨%20Example%20using%20Stryker-blue.svg "Using Stryker")
 
@@ -1786,7 +1786,7 @@ it("Test addNewOrder, don't use such test names", () => {
 
 <br/>
 
-### :thumbsdown: Esempoo Anti-Pattern: A test case full of errors, luckily all are caught by Linters
+### :thumbsdown: Esempio Anti-Pattern: A test case full of errors, luckily all are caught by Linters
 
 ```javascript
 describe("Too short description", () => {
@@ -1823,7 +1823,7 @@ it("Test name", () => {*//error:no-identical-title. Assign unique titles to test
 
 <br/>
 
-### :thumbsdown: Esempoo Anti-Pattern: The wrong Error object is thrown mistakenly, no stack-trace will appear for this error. Luckily, ESLint catches the next production bug
+### :thumbsdown: Esempio Anti-Pattern: The wrong Error object is thrown mistakenly, no stack-trace will appear for this error. Luckily, ESLint catches the next production bug
 
 ![alt text](assets/bp-21-yoni-goldberg-eslint.jpeg "The wrong Error object is thrown mistakenly, no stack-trace will appear for this error. Luckily, ESLint catches the next production bug")
 
