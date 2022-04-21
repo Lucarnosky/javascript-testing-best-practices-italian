@@ -427,31 +427,30 @@ it("Meglio: Quando si aggiungere un nuovo prodotto con proprietà valide, si ric
 
 ## ⚪ ️ 1.7 Testare combinazioni di input differenti usando il Property-base testing
 
-:white_check_mark: **Giusto:** Tipicamente scegliamo pochi esempi di input per ogni test. Anche quando il formato assomiglia ai dati del mondo reale (guarda il punto Even when the input format resembles real-world data (see bullet [‘Don’t foo’](https://github.com/goldbergyoni/javascript-testing-best-practices#-%EF%B8%8F16-dont-foo-use-realistic-input-data)), we cover only a few input combinations (method(‘’, true, 1), method(“string” , false , 0)), However, in production, an API that is called with 5 parameters can be invoked with thousands of different permutations, one of them might render our process down ([see Fuzz Testing](https://en.wikipedia.org/wiki/Fuzzing)). What if you could write a single test that sends 1000 permutations of different inputs automatically and catches for which input our code fails to return the right response? Property-based testing is a technique that does exactly that: by sending all the possible input combinations to your unit under test it increases the serendipity of finding a bug. For example, given a method — addNewProduct(id, name, isDiscount) — the supporting libraries will call this method with many combinations of (number, string, boolean) like (1, “iPhone”, false), (2, “Galaxy”, true). You can run property-based testing using your favorite test runner (Mocha, Jest, etc) using libraries like [js-verify](https://github.com/jsverify/jsverify) or [testcheck](https://github.com/leebyron/testcheck-js) (much better documentation). Update: Nicolas Dubien suggests in the comments below to [checkout fast-check](https://github.com/dubzzz/fast-check#readme) which seems to offer some additional features and also to be actively maintained
+:white_check_mark: **Giusto:** Tipicamente scegliamo pochi esempi di input per ogni test. Anche quando il formato assomiglia ai dati del mondo reale (guarda il punto [‘Don’t foo’](https://github.com/goldbergyoni/javascript-testing-best-practices#-%EF%B8%8F16-dont-foo-use-realistic-input-data)), copriamo solo alcune combinazioni (method('',true,1), method("string",false,0), In ogni caso, in produzione, una chiamata API con 5 parametri può essere invocata con migliaia di combinazioni differenti, uno di loro potrebbe corrompere il nostro processo ([vedi Fuzz Testing](https://en.wikipedia.org/wiki/Fuzzing)).  E se potessi scrivere un singolo test che invia automaticamente 1000 versioni di input diversi e rileva per quale input il nostro codice non restituisce la risposta corretta? Il Property-based test è una tecnica che fa esattamente questo: inviando tutte le possibili combinazioni di input alla tua unità in prova aumenta la possibilità di trovare un bug. Per sempio, dato il seguente metodo, — aggiungiNuovoProdotto(id, nome, scontato) — la libreria di supporto chiamerà il metodo con molte combinazioni di (numero,stringa,booleano) tipo (1,"IPhone",false), (2, “Galaxy”, true). Puoi eseguire dei test property-based usando il tuo test runner preferito (Mocha,Jest, ecc...) usando librerie come [js-verify](https://github.com/jsverify/jsverify) oppure [testcheck](https://github.com/leebyron/testcheck-js) (documentazione molto migliore). Aggiornamento: Nicolas Dubien suggerisce nei commenti di [guardare fast-check](https://github.com/dubzzz/fast-check#readme) che pare offra  più funzionalità ed è attivamente mantenuto.
 <br/>
 
-❌ **Altrimenti:** Unconsciously, you choose the test inputs that cover only code paths that work well. Unfortunately, this decreases the efficiency of testing as a vehicle to expose bugs
-
+❌ **Altrimenti:** Inconsciamente, sceglierai gli input di test che percorrono le porzioni di codice che funzionano. Sfortunatamente, questo diminuisce l'efficienza del test come strumento per trovare i bug
 <br/>
 
 <details><summary>✏ <b>Codice di esempio</b></summary>
 
 <br/>
 
-### :clap: Esempio di pratica corretta: Testing many input permutations with “fast-check”
+### :clap: Esempio di pratica corretta: Testare diversi input con “fast-check”
 
 ![](https://img.shields.io/badge/🔧%20Example%20using%20Jest-blue.svg "Esempi con Jest")
 
 ```javascript
 import fc from "fast-check";
 
-describe("Product service", () => {
-  describe("Adding new", () => {
-    //this will run 100 times with different random properties
-    it("Add new product with random yet valid properties, always successful", () =>
+describe("Servizio Prodotto", () => {
+  describe("Aggiungi nuovo", () => {
+    //verrà eseguito 100 volte con proprietà casuali differenti
+    it("Aggiungi un nuovo prodotto con proprietà valide ma casuali, sempre corretto", () =>
       fc.assert(
-        fc.property(fc.integer(), fc.string(), (id, name) => {
-          expect(addNewProduct(id, name).status).toEqual("approved");
+        fc.property(fc.integer(), fc.string(), (id, nome) => {
+          expect(aggiungiNuovoProdotto(id, nome).status).toEqual("approvato");
         })
       ));
   });
